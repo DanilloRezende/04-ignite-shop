@@ -7,6 +7,7 @@ import 'keen-slider/keen-slider.min.css'
 import { stripe } from "../lib/stripe";
 import { GetStaticProps } from "next";
 import Stripe from "stripe";
+import Link from "next/link";
 
 interface HomeProps {
   products: {
@@ -17,9 +18,9 @@ interface HomeProps {
   }[]
 }
 
-export default function Home({products}: HomeProps) {
+export default function Home({ products }: HomeProps) {
 
-  const  [sliderRef] = useKeenSlider({
+  const [sliderRef] = useKeenSlider({
     slides: {
       perView: 3,
       spacing: 48,
@@ -27,18 +28,20 @@ export default function Home({products}: HomeProps) {
   })
 
   return (
-    <HomeContainer ref={sliderRef} className="keen-slider">     
-      {products.map(product => { 
+    <HomeContainer ref={sliderRef} className="keen-slider">
+      {products.map(product => {
         return (
-      <Product key={product.id} className="keen-slider__slide">
-        <Image src={product.imageUrl} alt='Imagem de uma camisa' width={520} height={480}/>
+          <Link href={`/product/.${product.id}`} key={product.id}>
+            <Product className="keen-slider__slide">
+              <Image src={product.imageUrl} alt='Imagem de uma camisa' width={520} height={480} />
 
-        <footer>
-          <strong>{product.name}</strong>
-          <span>{product.price}</span>
-        </footer>
-      </Product>
-      )
+              <footer>
+                <strong>{product.name}</strong>
+                <span>{product.price}</span>
+              </footer>
+            </Product>
+          </Link>
+        )
       })}
     </HomeContainer>
   )
@@ -51,7 +54,7 @@ export const getStaticProps: GetStaticProps = async () => {
 
   const products = response.data.map(product => {
     const price = product.default_price as Stripe.Price;
-    return{
+    return {
       id: product.id,
       name: product.name,
       imageUrl: product.images[0],
@@ -64,10 +67,10 @@ export const getStaticProps: GetStaticProps = async () => {
     }
   })
 
-    return{
-      props: {
-        products
-      },
-      revalidate: 60 * 60 * 2,
-    }
+  return {
+    props: {
+      products
+    },
+    revalidate: 60 * 60 * 2,
+  }
 }
