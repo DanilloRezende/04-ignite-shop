@@ -32,14 +32,14 @@ export const ProductDetails = styled('div', {
     flexDirection: 'column',
 
     h1: {
-        fontSize: '$2xl',
+        fontSize: '2rem',
         color: '$gray300',        
     },
 
     span: {
         marginTop: '1rem',
         display: 'block',
-        fontSize: '$2xl',
+        fontSize: '2rem',
         color: '$green300',
     },
 
