@@ -1,7 +1,8 @@
 
+import axios from "axios"
 import Image from "next/image"
-import { useRouter } from "next/router"
 import { GetStaticPaths, GetStaticProps } from "next/types"
+import { useState } from "react"
 import Stripe from "stripe"
 import { stripe } from "../../lib/stripe"
 import { ImageContainer, ProductContainer, ProductDetails } from "../../styles/pages/product"
@@ -13,15 +14,31 @@ interface ProductProps {
       imageUrl: string;
       price: string;
       description: string;
+      defaultPriceId: string;
     }
   }
 
 export default function Product({ product } : ProductProps) {
-    const { isFallback } = useRouter() 
+    const [isCreatingCheckoutSession, setIsCreatingCheckoutSession] = useState(false)
+    async function handleByProduct() {
+        try {
+            setIsCreatingCheckoutSession(true);
 
-        if(isFallback) {
-        return 
+            const response = await axios.post('/api/checkout', {
+                priceId: product.defaultPriceId,
+            })
+            const { checkoutUrl } = response.data;
+
+            window.location.href = checkoutUrl;
+        } catch (err) {
+            //conectar com alguma ferramenta de observabilidade (datadog / sentry)
+
+            setIsCreatingCheckoutSession(false);
+            alert('Falha ao redirecionar ao checkout')
+        }
     }
+
+    
     return (
         <ProductContainer>
             <ImageContainer>
@@ -34,7 +51,7 @@ export default function Product({ product } : ProductProps) {
 
                 <p>{product.description}</p>
 
-                <button>
+                <button disabled={isCreatingCheckoutSession} onClick={handleByProduct}>
                     Comprar Agora
                 </button>
             </ProductDetails>
@@ -48,7 +65,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
         paths: [
             {params: {id: 'prod_MTUM1p5kufJKxL'}}
         ],
-        fallback: false
+        fallback: 'blocking',
     }       
     
 }
@@ -73,6 +90,7 @@ export const getStaticProps: GetStaticProps<any, { id: string }> = async ({ para
                     currency: 'BRL',
                 }).format(price.unit_amount / 100),
                 description: product.description,
+                defaultPriceId: price.id,
             }
         },
         revalidate: 60 * 60 * 1, // 1 hour
