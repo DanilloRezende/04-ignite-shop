@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { useKeenSlider } from 'keen-slider/react'
+import { useKeenSlider } from 'keen-slider/react';
+import Head from "next/head"
 
 import { HomeContainer, Product } from "../styles/pages/home";
 
@@ -28,7 +29,12 @@ export default function Home({ products }: HomeProps) {
   })
 
   return (
-    <HomeContainer ref={sliderRef} className="keen-slider">
+    <>
+    <Head>
+      Ignite Shop
+    </Head>
+
+    <HomeContainer ref={sliderRef} className="keen-slider">      
       {products.map(product => {
         return (
           <Link href={`/product/${product.id}`} key={product.id}>
@@ -46,7 +52,8 @@ export default function Home({ products }: HomeProps) {
         )
       })}
     </HomeContainer>
-  )
+    </>  )
+  
 }
 
 export const getStaticProps: GetStaticProps = async () => {
